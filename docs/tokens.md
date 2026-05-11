@@ -1,0 +1,30 @@
+NUMBER -> Numerical value
+PLUS -> +
+MINUS -> -
+STAR -> *
+SLASH -> /
+LPAREN -> (
+RPAREN -> )
+EOF 
+
+ex:
+
+INPUT
+2+(3*4)/(5-1) 
+
+
+TOKENS
+NUMBER(2)
+PLUS
+LPAREN
+NUMBER(3)
+MUL
+NUMBER(4)
+RPAREN
+DIV
+LPAREN
+NUMBER(5)
+MINUS
+NUMBER(1)
+RPAREN
+EOF
