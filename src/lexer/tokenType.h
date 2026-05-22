@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 enum class tokenType
 {
 	NUMBER,
@@ -11,3 +12,27 @@ enum class tokenType
 	EOF_TOKEN,
 
 };
+
+inline std::string tokenTypeToString(tokenType type)
+{
+    switch (type) {
+    case tokenType::NUMBER:
+        return "NUMBER";
+    case tokenType::PLUS:
+        return "PLUS";
+    case tokenType::MINUS:
+        return "MINUS";
+    case tokenType::STAR:
+        return "STAR";
+    case tokenType::SLASH:
+        return "SLASH";
+    case tokenType::LPAREN:
+        return "LPAREN";
+    case tokenType::RPAREN:
+        return "RPAREN";
+    case tokenType::EOF_TOKEN:
+        return "EOF_TOKEN";
+    default:
+        return "UNKNOWN";
+    }
+}
