@@ -9,4 +9,4 @@ add_executable(
     interpreter
     src/main/main.cpp
     src/lexer/lexer.cpp
- )
+  "src/ast/expr.h" "src/parser/parser.h" "src/parser/parser.cpp")

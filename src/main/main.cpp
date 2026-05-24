@@ -3,6 +3,7 @@
 #include <iomanip>
 #include "../lexer/lexer.h"
 #include "../lexer/tokenType.h"
+#include "../parser/parser.h"
 
 int main() {
     std::string input;
@@ -37,6 +38,12 @@ int main() {
             }
 
             std::cout << "------------------\n";
+
+            Parser parser(lexer.getTokens());
+            auto ast = parser.parse();
+
+            std::cout << "AST creado exitosamente\n";
+			parser.printAST(ast.get());
         }
         catch (const std::exception& e) {
             std::cout << "Error: " << e.what() << "\n";
