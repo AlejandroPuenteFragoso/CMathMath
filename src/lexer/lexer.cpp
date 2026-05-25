@@ -36,9 +36,9 @@ bool Lexer::isAtEnd()
 
 void Lexer::skipWhitespace()
 {
-	if (isspace(Lexer::peek()))
+    while (std::isspace(static_cast<unsigned char>(peek())))
     {
-        Lexer::advance();
+        advance();
     }
 }
 
@@ -89,9 +89,10 @@ void Lexer::scanNumber()
 void Lexer::scanTokens()
 {
     while (!isAtEnd()) {
-        start = current;
         skipWhitespace();
         if (isAtEnd()) break;
+
+		start = current;  // avoid blank spaces on the left of the lexeme
 
         if (std::isdigit(peek())) {
             scanNumber();
@@ -102,7 +103,7 @@ void Lexer::scanTokens()
         advance();
         std::string tokenValue(1, c);
         tokenType type = createToken(tokenValue);
-        tokens.push_back(Token(type, tokenValue)); 
+        tokens.push_back(Token(type, tokenValue));
     }
     tokens.push_back(Token(tokenType::EOF_TOKEN, ""));
 }
