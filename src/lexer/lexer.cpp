@@ -1,6 +1,7 @@
 #include "lexer.h"
 #include <string>
 #include <cctype>
+#include <stdexcept>
 #include "tokenType.h"
 
 Lexer::Lexer(const std::string& input) : input(input)
@@ -20,6 +21,14 @@ char Lexer::peek()
     return '\0';
 }
 
+char Lexer::peekNext()
+{
+    if (current + 1 < input.size()) {
+        return input[current + 1];
+    }
+    return '\0';
+}
+
 bool Lexer::isAtEnd()
 {
     return current >= input.size();
@@ -33,17 +42,69 @@ void Lexer::skipWhitespace()
     }
 }
 
+const std::vector<Token>& Lexer::getTokens() const
+{
+    return tokens;
+}
+
+void Lexer::scanNumber()
+{
+    bool hasDot = false;
+
+    // Consume integer part
+    while (std::isdigit(peek())) {
+        advance();
+    }
+
+    // Optional decimal part
+    if (peek() == '.') {
+
+        if (hasDot) {
+            throw std::runtime_error("Invalid number format: multiple decimal points");
+        }
+
+        hasDot = true;
+        advance(); // consume '.'
+
+        // Require at least one digit after '.'
+        if (!std::isdigit(peek())) {
+            throw std::runtime_error("Invalid number format");
+        }
+
+        while (std::isdigit(peek())) {
+            advance();
+        }
+    }
+
+    // Detect second decimal point
+    if (peek() == '.') {
+        throw std::runtime_error("Invalid number format: multiple decimal points");
+    }
+
+    std::string lexeme = input.substr(start, current - start);
+
+    tokens.push_back(Token(tokenType::NUMBER, lexeme));
+}
+
 void Lexer::scanTokens()
 {
-    while (!Lexer::isAtEnd())
-    {
-        Lexer::skipWhitespace();
-        if (Lexer::isAtEnd()) break;
-        char c = Lexer::peek();
+    while (!isAtEnd()) {
+        start = current;
+        skipWhitespace();
+        if (isAtEnd()) break;
+
+        if (std::isdigit(peek())) {
+            scanNumber();
+            continue;
+        }
+
+        char c = peek();
+        advance();
         std::string tokenValue(1, c);
-        tokenType type = Lexer::createToken(tokenValue);
-        Lexer::advance();
+        tokenType type = createToken(tokenValue);
+        tokens.push_back(Token(type, tokenValue)); 
     }
+    tokens.push_back(Token(tokenType::EOF_TOKEN, ""));
 }
 
 tokenType Lexer::createToken(const std::string& value)
