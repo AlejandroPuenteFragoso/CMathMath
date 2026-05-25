@@ -36,7 +36,7 @@ bool Lexer::isAtEnd()
 
 void Lexer::skipWhitespace()
 {
-    while (isspace(peek()))
+    while (std::isspace(static_cast<unsigned char>(peek())))
     {
         advance();
     }
