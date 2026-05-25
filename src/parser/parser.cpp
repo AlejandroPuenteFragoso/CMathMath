@@ -7,7 +7,11 @@ Parser::Parser(const std::vector<Token>& tokens)
 }
 
 std::unique_ptr<Expr> Parser::parse() {
-    return expression();
+    auto expr = expression();
+    if (!isAtEnd() || peek().type != tokenType::EOF_TOKEN) {
+        throw std::runtime_error("Unexpected tokens after expression.");
+    }
+    return expr;
 }
 
 Token Parser::peek() {
