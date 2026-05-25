@@ -43,7 +43,7 @@ int main() {
             auto ast = parser.parse();
 
             std::cout << "AST creado exitosamente\n";
-			parser.printAST(ast.get());
+            parser.printAST(ast.get());
         }
         catch (const std::exception& e) {
             std::cout << "Error: " << e.what() << "\n";
