@@ -9,7 +9,10 @@ int main() {
 
     while (true) {
         std::cout << "\nInput: ";
-        std::getline(std::cin, input);
+        if (!std::getline(std::cin, input)) {
+            std::cout << "¡Bye!\n";
+            break;
+        }
 
         if (input == "exit") {
             std::cout << "¡Bye!\n";
