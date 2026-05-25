@@ -3,7 +3,6 @@
 #include "../ast/expr.h"
 #include <vector>
 #include <memory>
-#include <stdexcept>
 
 class Parser {
 public:
