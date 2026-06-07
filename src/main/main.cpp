@@ -41,9 +41,11 @@ int main() {
 
             Parser parser(lexer.getTokens());
             auto ast = parser.parse();
+            auto result = ast->eval();
 
             std::cout << "AST creado exitosamente\n";
             parser.printAST(ast.get());
+            std::cout << "Resultado: " << result << "\n";
         }
         catch (const std::exception& e) {
             std::cout << "Error: " << e.what() << "\n";
