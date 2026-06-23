@@ -103,6 +103,10 @@ void Lexer::scanTokens()
         advance();
         std::string tokenValue(1, c);
         tokenType type = createToken(tokenValue);
+        if (type == tokenType::UNKNOWN) {
+            throw std::runtime_error(
+            std::string("Caracter inesperado: '") + c + "'");
+        }
         tokens.push_back(Token(type, tokenValue));
     }
     tokens.push_back(Token(tokenType::EOF_TOKEN, ""));
@@ -135,6 +139,7 @@ tokenType Lexer::createToken(const std::string& value)
             }
         }
         if (hasDigits) return tokenType::NUMBER;
+        else return tokenType::UNKNOWN;
     }
 
     return tokenType::EOF_TOKEN;
