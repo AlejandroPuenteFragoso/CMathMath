@@ -139,7 +139,6 @@ tokenType Lexer::createToken(const std::string& value)
             }
         }
         if (hasDigits) return tokenType::NUMBER;
-        else return tokenType::UNKNOWN;
     }
 
     return tokenType::UNKNOWN;
