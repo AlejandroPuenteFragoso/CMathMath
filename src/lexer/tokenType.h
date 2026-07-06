@@ -35,7 +35,5 @@ inline std::string tokenTypeToString(tokenType type)
             return "EOF_TOKEN";
         case tokenType::UNKNOWN:
             return "UNKNOWN";
-        default:
-            return "UNDEFINED";
     }
 }
