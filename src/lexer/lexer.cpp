@@ -142,7 +142,7 @@ tokenType Lexer::createToken(const std::string& value)
         else return tokenType::UNKNOWN;
     }
 
-    return tokenType::EOF_TOKEN;
+    return tokenType::UNKNOWN;
 }
 
 
