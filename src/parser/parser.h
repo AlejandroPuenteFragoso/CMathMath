@@ -19,6 +19,9 @@ private:
     std::unique_ptr<Expr> factor();
     std::unique_ptr<Expr> unary();
     std::unique_ptr<Expr> primary();
+    std::unique_ptr<Expr> equality();
+    std::unique_ptr<Expr> comparison();
+    std::unique_ptr<Expr> additive();
     Token advance();
     Token peek();
     bool isAtEnd();

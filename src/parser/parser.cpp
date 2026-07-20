@@ -44,17 +44,9 @@ bool Parser::match(tokenType type) {
 }
 
 // Grammar:
-// expression → term (('+' | '-') term)*
+// expression -> equality
 std::unique_ptr<Expr> Parser::expression() {
-    auto expr = term();
-
-    while (match(tokenType::PLUS) || match(tokenType::MINUS)) {
-        Token op = tokens[current - 1];
-        auto right = term();
-        expr = std::make_unique<Binary>(std::move(expr), op, std::move(right));
-    }
-
-    return expr;
+    return equality();
 }
 
 // term → factor (('*' | '/') factor)*
@@ -101,6 +93,55 @@ std::unique_ptr<Expr> Parser::primary() {
     }
 
     throw std::runtime_error("Expected number or '('");
+}
+
+// equality -> comparison (("==" | "!=") comparison)*
+std::unique_ptr<Expr> Parser::equality() {
+    auto expr = comparison();
+    while (match(tokenType::EQUAL_EQUAL) || match(tokenType::BANG_EQUAL)) {
+        Token op = tokens[current - 1];
+        expr = std::make_unique<Binary>(std::move(expr), op, comparison());
+    }
+    return expr;
+}
+
+// comparison -> additive ((">" | ">=" | "<" | "<=") additive)*
+std::unique_ptr<Expr> Parser::comparison() {
+    auto expr = additive();
+
+    while (match(tokenType::LESS) ||
+           match(tokenType::LESS_EQUAL) ||
+           match(tokenType::GREATER) ||
+           match(tokenType::GREATER_EQUAL)) {
+        Token op = tokens[current - 1];
+        auto right = additive();
+
+        expr = std::make_unique<Binary>(
+            std::move(expr),
+            op,
+            std::move(right)
+        );
+    }
+
+    return expr;
+}
+
+// additive -> term (("+" | "-") term)*
+std::unique_ptr<Expr> Parser::additive() {
+    auto expr = term();
+
+    while (match(tokenType::PLUS) || match(tokenType::MINUS)) {
+        Token op = tokens[current - 1];
+        auto right = term();
+
+        expr = std::make_unique<Binary>(
+            std::move(expr),
+            op,
+            std::move(right)
+        );
+    }
+
+    return expr;
 }
 
 void Parser::printAST(Expr* expr, int indent) {

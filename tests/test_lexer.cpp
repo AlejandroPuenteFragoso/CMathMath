@@ -44,5 +44,33 @@ TEST_CASE("Lexer: ignora los espacios en blanco") {
 //     CHECK_THROWS(lexer.scanTokens());
 // }
 
-// TODO(Alex, #15): añadir casos para los tokens de comparación e igualdad (== != < > <= >=).
+TEST_CASE("Lexer: reconoce operadores de comparacion e igualdad") {
+    Lexer lexer("< <= > >= == !=");
+    lexer.scanTokens();
+
+    const auto& tokens = lexer.getTokens();
+
+    REQUIRE(tokens.size() == 7);
+
+    CHECK(tokens[0].type == tokenType::LESS);
+    CHECK(tokens[0].lexeme == "<");
+
+    CHECK(tokens[1].type == tokenType::LESS_EQUAL);
+    CHECK(tokens[1].lexeme == "<=");
+
+    CHECK(tokens[2].type == tokenType::GREATER);
+    CHECK(tokens[2].lexeme == ">");
+
+    CHECK(tokens[3].type == tokenType::GREATER_EQUAL);
+    CHECK(tokens[3].lexeme == ">=");
+
+    CHECK(tokens[4].type == tokenType::EQUAL_EQUAL);
+    CHECK(tokens[4].lexeme == "==");
+
+    CHECK(tokens[5].type == tokenType::BANG_EQUAL);
+    CHECK(tokens[5].lexeme == "!=");
+
+    CHECK(tokens[6].type == tokenType::EOF_TOKEN);
+    CHECK(tokens[6].lexeme.empty());
+}
 // TODO(Alex, #16): añadir casos para las palabras clave true/false/nil y el operador !.

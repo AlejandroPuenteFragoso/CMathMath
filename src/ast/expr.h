@@ -18,18 +18,38 @@ struct Binary : Expr {
     }
 
     double eval() override {
+        double leftValue = left->eval();
+        double rightValue = right->eval();
         switch (op.type) {
             case tokenType::PLUS:
-                return left->eval() + right->eval();
+                return leftValue + rightValue;
             case tokenType::MINUS:
-                return left->eval() - right->eval();
+                return leftValue - rightValue;
             case tokenType::STAR:
-                return left->eval() * right->eval();
+                return leftValue * rightValue;
             case tokenType::SLASH:
-                if (right->eval() == 0.0) {
+                if (rightValue == 0.0) {
                     throw std::runtime_error("Division by zero error");
                 }
-                return left->eval() / right->eval();
+                return leftValue / rightValue;
+            case tokenType::LESS:
+                return leftValue < rightValue ? 1.0 : 0.0;
+
+            case tokenType::LESS_EQUAL:
+                return leftValue <= rightValue ? 1.0 : 0.0;
+
+            case tokenType::GREATER:
+                return leftValue > rightValue ? 1.0 : 0.0;
+
+            case tokenType::GREATER_EQUAL:
+                return leftValue >= rightValue ? 1.0 : 0.0;
+
+            case tokenType::EQUAL_EQUAL:
+                return leftValue == rightValue ? 1.0 : 0.0;
+
+            case tokenType::BANG_EQUAL:
+                return leftValue != rightValue ? 1.0 : 0.0;
+
             default:
                 throw std::runtime_error("Operador desconocido");
 		}

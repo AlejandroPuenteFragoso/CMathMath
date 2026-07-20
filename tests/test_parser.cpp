@@ -31,5 +31,32 @@ TEST_CASE("Parser: un operador sin operando derecho es un error") {
     CHECK_THROWS(parse("3 +"));
 }
 
+TEST_CASE("Parser: igualdad tiene menor precedencia que suma") {
+    auto ast = parse("1 + 1 == 2");
+
+    auto* equality = dynamic_cast<Binary*>(ast.get());
+    REQUIRE(equality != nullptr);
+    CHECK(equality->op.type == tokenType::EQUAL_EQUAL);
+
+    auto* addition = dynamic_cast<Binary*>(equality->left.get());
+    REQUIRE(addition != nullptr);
+    CHECK(addition->op.type == tokenType::PLUS);
+
+    auto* right = dynamic_cast<Literal*>(equality->right.get());
+    REQUIRE(right != nullptr);
+    CHECK(right->value == 2.0);
+}
+
+TEST_CASE("Parser: comparacion tiene mayor precedencia que igualdad") {
+    auto ast = parse("1 == 2 < 3");
+
+    auto* equality = dynamic_cast<Binary*>(ast.get());
+    REQUIRE(equality != nullptr);
+    CHECK(equality->op.type == tokenType::EQUAL_EQUAL);
+
+    auto* comparison = dynamic_cast<Binary*>(equality->right.get());
+    REQUIRE(comparison != nullptr);
+    CHECK(comparison->op.type == tokenType::LESS);
+}
 // TODO(Alex, #27): tras renombrar term/factor para alinearlos con la gramática,
 //   añadir tests de asociatividad que fijen la precedencia (p. ej. 2 - 3 - 4).
