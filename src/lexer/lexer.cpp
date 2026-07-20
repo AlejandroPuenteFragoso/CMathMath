@@ -101,7 +101,31 @@ void Lexer::scanTokens()
 
         char c = peek();
         advance();
-        std::string tokenValue(1, c);
+
+        // Handle multi-character operators: ==, !=, <=, >=
+        std::string tokenValue;
+        switch (c) {
+        case '=':
+            if (peek() == '=') { advance(); tokenValue = "=="; }
+            else { tokenValue = "="; }
+            break;
+        case '!':
+            if (peek() == '=') { advance(); tokenValue = "!="; }
+            else { tokenValue = "!"; }
+            break;
+        case '<':
+            if (peek() == '=') { advance(); tokenValue = "<="; }
+            else { tokenValue = "<"; }
+            break;
+        case '>':
+            if (peek() == '=') { advance(); tokenValue = ">="; }
+            else { tokenValue = ">"; }
+            break;
+        default:
+            tokenValue = std::string(1, c);
+            break;
+        }
+
         tokenType type = createToken(tokenValue);
         tokens.push_back(Token(type, tokenValue));
     }
@@ -116,6 +140,13 @@ tokenType Lexer::createToken(const std::string& value)
     if (value == "/") return tokenType::SLASH;
     if (value == "(") return tokenType::LPAREN;
     if (value == ")") return tokenType::RPAREN;
+    // Comparison / equality operators
+    if (value == "==") return tokenType::EQUAL_EQUAL;
+    if (value == "!=") return tokenType::BANG_EQUAL;
+    if (value == "<") return tokenType::LESS;
+    if (value == "<=") return tokenType::LESS_EQUAL;
+    if (value == ">") return tokenType::GREATER;
+    if (value == ">=") return tokenType::GREATER_EQUAL;
 
     // Check if the string represents a number (integer or floating)
     if (!value.empty()) {
