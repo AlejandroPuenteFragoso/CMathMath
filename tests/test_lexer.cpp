@@ -37,12 +37,11 @@ TEST_CASE("Lexer: ignora los espacios en blanco") {
     CHECK(tokens[2].type == tokenType::LPAREN);
 }
 
-// TODO(Alex, #26): un carácter inválido debe lanzar un error, no producir un EOF_TOKEN.
-//   Cuando #26 esté resuelto, descomenta este caso:
-// TEST_CASE("Lexer: un caracter invalido lanza error") {
-//     Lexer lexer("2 @ 3");
-//     CHECK_THROWS(lexer.scanTokens());
-// }
+
+ TEST_CASE("Lexer: un caracter invalido lanza error") {
+     Lexer lexer("2 @ 3");
+     CHECK_THROWS(lexer.scanTokens());
+ }
 
 // TODO(Alex, #15): añadir casos para los tokens de comparación e igualdad (== != < > <= >=).
 // TODO(Alex, #16): añadir casos para las palabras clave true/false/nil y el operador !.
