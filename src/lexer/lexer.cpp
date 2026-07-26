@@ -168,7 +168,9 @@ tokenType Lexer::createToken(const std::string& value)
         if (hasDigits) return tokenType::NUMBER;
     }
 
-    return tokenType::EOF_TOKEN;
+    throw std::runtime_error(
+        "Unexpected character: " + value
+    );
 }
 
 
