@@ -74,3 +74,23 @@ TEST_CASE("Lexer: reconoce operadores de comparacion e igualdad") {
     CHECK(tokens[6].lexeme.empty());
 }
 // TODO(Alex, #16): añadir casos para las palabras clave true/false/nil y el operador !.
+
+TEST_CASE("Lexer rechaza caracteres invalidos") {
+    Lexer lexerEqual("5 = 5");
+    CHECK_THROWS_WITH(
+        lexerEqual.scanTokens(),
+        "Unexpected character: ="
+    );
+
+    Lexer lexerBang("3 ! 2");
+    CHECK_THROWS_WITH(
+        lexerBang.scanTokens(),
+        "Unexpected character: !"
+    );
+
+    Lexer lexerUnknown("5 @ 5");
+    CHECK_THROWS_WITH(
+        lexerUnknown.scanTokens(),
+        "Unexpected character: @"
+    );
+}
