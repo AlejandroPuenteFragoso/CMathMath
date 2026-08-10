@@ -1,24 +1,37 @@
 #pragma once
 #include <string>
+
+/**
+ * @brief Categories of the lexical units the language understands.
+ *
+ * Produced by Lexer::createToken and consumed by the Parser to decide
+ * which grammar rule applies.
+ */
 enum class tokenType
 {
-	NUMBER,
-	PLUS,
-	MINUS,
-	STAR,
-	SLASH,
-	LPAREN,
-	RPAREN,
-    EQUAL_EQUAL,
-    BANG_EQUAL,
-    LESS,
-    LESS_EQUAL,
-    GREATER,
-    GREATER_EQUAL,
-	EOF_TOKEN,
+	NUMBER,        ///< Numeric literal: integer or decimal with digits after the point.
+	PLUS,          ///< Binary addition or unary plus: "+".
+	MINUS,         ///< Binary subtraction or unary negation: "-".
+	STAR,          ///< Multiplication: "*".
+	SLASH,         ///< Division: "/".
+	LPAREN,        ///< Opening parenthesis: "(".
+	RPAREN,        ///< Closing parenthesis: ")".
+    EQUAL_EQUAL,   ///< Equality: "==". A lone "=" is not part of the language.
+    BANG_EQUAL,    ///< Inequality: "!=". A lone "!" is not part of the language.
+    LESS,          ///< Comparison: "<".
+    LESS_EQUAL,    ///< Comparison: "<=".
+    GREATER,       ///< Comparison: ">".
+    GREATER_EQUAL, ///< Comparison: ">=".
+	EOF_TOKEN,     ///< Sentinel appended after the last real token; its lexeme is empty.
 
 };
 
+/**
+ * @brief Returns the identifier of a category as text, for logs and debugging.
+ * @param type Category to name.
+ * @return The enumerator's own name, e.g. "NUMBER"; "UNKNOWN" if the value
+ *         does not match any enumerator.
+ */
 inline std::string tokenTypeToString(tokenType type)
 {
     switch (type) {
