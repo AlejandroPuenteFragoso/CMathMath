@@ -44,7 +44,8 @@ TEST_CASE("Parser: igualdad tiene menor precedencia que suma") {
 
     auto* right = dynamic_cast<Literal*>(equality->right.get());
     REQUIRE(right != nullptr);
-    CHECK(right->value == 2.0);
+    REQUIRE(std::holds_alternative<double>(right->value));
+    CHECK(std::get<double>(right->value) == 2.0);
 }
 
 TEST_CASE("Parser: comparacion tiene mayor precedencia que igualdad") {
@@ -57,6 +58,31 @@ TEST_CASE("Parser: comparacion tiene mayor precedencia que igualdad") {
     auto* comparison = dynamic_cast<Binary*>(equality->right.get());
     REQUIRE(comparison != nullptr);
     CHECK(comparison->op.type == tokenType::LESS);
+}
+
+TEST_CASE("Parser: construye literales booleanos y nil") {
+    auto trueAst = parse("true");
+    auto* trueLiteral = dynamic_cast<Literal*>(trueAst.get());
+    REQUIRE(trueLiteral != nullptr);
+    REQUIRE(std::holds_alternative<bool>(trueLiteral->value));
+    CHECK(std::get<bool>(trueLiteral->value));
+
+    auto nilAst = parse("nil");
+    auto* nilLiteral = dynamic_cast<Literal*>(nilAst.get());
+    REQUIRE(nilLiteral != nullptr);
+    CHECK(std::holds_alternative<std::monostate>(nilLiteral->value));
+}
+
+TEST_CASE("Parser: construye negación lógica unaria") {
+    auto ast = parse("!false");
+    auto* unary = dynamic_cast<Unary*>(ast.get());
+    REQUIRE(unary != nullptr);
+    CHECK(unary->op.type == tokenType::BANG);
+
+    auto* literal = dynamic_cast<Literal*>(unary->right.get());
+    REQUIRE(literal != nullptr);
+    REQUIRE(std::holds_alternative<bool>(literal->value));
+    CHECK_FALSE(std::get<bool>(literal->value));
 }
 // TODO(Alex, #27): tras renombrar term/factor para alinearlos con la gramática,
 //   añadir tests de asociatividad que fijen la precedencia (p. ej. 2 - 3 - 4).

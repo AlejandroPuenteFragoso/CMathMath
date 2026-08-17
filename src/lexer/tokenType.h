@@ -16,12 +16,16 @@ enum class tokenType
 	SLASH,         ///< Division: "/".
 	LPAREN,        ///< Opening parenthesis: "(".
 	RPAREN,        ///< Closing parenthesis: ")".
+    BANG,          ///< Logical negation: "!".
     EQUAL_EQUAL,   ///< Equality: "==". A lone "=" is not part of the language.
-    BANG_EQUAL,    ///< Inequality: "!=". A lone "!" is not part of the language.
+    BANG_EQUAL,    ///< Inequality: "!=".
     LESS,          ///< Comparison: "<".
     LESS_EQUAL,    ///< Comparison: "<=".
     GREATER,       ///< Comparison: ">".
     GREATER_EQUAL, ///< Comparison: ">=".
+	TRUE,           ///< Boolean literal: "true".
+	FALSE,          ///< Boolean literal: "false".
+	NIL,            ///< Nil literal: "nil".
 	EOF_TOKEN,     ///< Sentinel appended after the last real token; its lexeme is empty.
 
 };
@@ -49,6 +53,8 @@ inline std::string tokenTypeToString(tokenType type)
         return "LPAREN";
     case tokenType::RPAREN:
         return "RPAREN";
+    case tokenType::BANG:
+        return "BANG";
     case tokenType::EQUAL_EQUAL:
         return "EQUAL_EQUAL";
     case tokenType::BANG_EQUAL:
@@ -61,6 +67,12 @@ inline std::string tokenTypeToString(tokenType type)
         return "GREATER";
     case tokenType::GREATER_EQUAL:
         return "GREATER_EQUAL";
+    case tokenType::TRUE:
+        return "TRUE";
+    case tokenType::FALSE:
+        return "FALSE";
+    case tokenType::NIL:
+        return "NIL";
     case tokenType::EOF_TOKEN:
         return "EOF_TOKEN";
     default:

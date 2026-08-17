@@ -16,8 +16,8 @@
  *   additive   -> term (("+" | "-") term)*
  *   term       -> factor (("*" | "/") factor)*
  *   factor     -> unary
- *   unary      -> ("+" | "-") unary | primary
- *   primary    -> NUMBER | "(" expression ")"
+ *   unary      -> ("!" | "+" | "-") unary | primary
+ *   primary    -> NUMBER | "true" | "false" | "nil" | "(" expression ")"
  *
  * The input must come from Lexer::getTokens(), so it always ends with an
  * EOF_TOKEN sentinel.
@@ -56,10 +56,10 @@ private:
     std::unique_ptr<Expr> term();
     /// @brief factor -> unary. Passthrough level (see issue #27).
     std::unique_ptr<Expr> factor();
-    /// @brief unary -> ("+" | "-") unary | primary. Right-associative by recursion.
+    /// @brief unary -> ("!" | "+" | "-") unary | primary. Right-associative by recursion.
     std::unique_ptr<Expr> unary();
     /**
-     * @brief primary -> NUMBER | "(" expression ")". Highest precedence.
+     * @brief primary -> NUMBER | "true" | "false" | "nil" | "(" expression ")".
      * @throws std::runtime_error on any other token, or if the ')' is missing.
      */
     std::unique_ptr<Expr> primary();

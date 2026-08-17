@@ -1,5 +1,6 @@
 #pragma once
 #include "../lexer/token.h"
+#include "../runtime/value.h"
 #include <memory>
 #include <stdexcept>
 
@@ -16,13 +17,10 @@ struct Expr {
     /**
      * @brief Computes the value of this subtree.
      *
-     * Every value in the language is a double for now; comparisons yield
-     * 1.0 (true) or 0.0 (false) until a boolean type exists (issue #16).
-     *
-     * @return The numeric result of the subtree.
+     * @return A number, boolean or nil value.
      * @throws std::runtime_error on runtime errors, e.g. division by zero.
      */
-    virtual double eval()= 0;
+    virtual Value eval() = 0;
 };
 
 /**
@@ -41,42 +39,44 @@ struct Binary : Expr {
 
     /**
      * @brief Evaluates both operands (left first, exactly once each) and applies `op`.
-     * @return The arithmetic result, or 1.0/0.0 for comparisons and equality.
+     * @return The arithmetic result, or a boolean for comparisons and equality.
      * @throws std::runtime_error on division by zero, or if `op` is not a
      *         binary operator this node knows how to apply.
      */
-    double eval() override {
-        double leftValue = left->eval();
-        double rightValue = right->eval();
+    Value eval() override {
+        Value leftValue = left->eval();
+        Value rightValue = right->eval();
         switch (op.type) {
             case tokenType::PLUS:
-                return leftValue + rightValue;
+                return asNumber(leftValue) + asNumber(rightValue);
             case tokenType::MINUS:
-                return leftValue - rightValue;
+                return asNumber(leftValue) - asNumber(rightValue);
             case tokenType::STAR:
-                return leftValue * rightValue;
-            case tokenType::SLASH:
-                if (rightValue == 0.0) {
+                return asNumber(leftValue) * asNumber(rightValue);
+            case tokenType::SLASH: {
+                const double divisor = asNumber(rightValue);
+                if (divisor == 0.0) {
                     throw std::runtime_error("Division by zero error");
                 }
-                return leftValue / rightValue;
+                return asNumber(leftValue) / divisor;
+            }
             case tokenType::LESS:
-                return leftValue < rightValue ? 1.0 : 0.0;
+                return asNumber(leftValue) < asNumber(rightValue);
 
             case tokenType::LESS_EQUAL:
-                return leftValue <= rightValue ? 1.0 : 0.0;
+                return asNumber(leftValue) <= asNumber(rightValue);
 
             case tokenType::GREATER:
-                return leftValue > rightValue ? 1.0 : 0.0;
+                return asNumber(leftValue) > asNumber(rightValue);
 
             case tokenType::GREATER_EQUAL:
-                return leftValue >= rightValue ? 1.0 : 0.0;
+                return asNumber(leftValue) >= asNumber(rightValue);
 
             case tokenType::EQUAL_EQUAL:
-                return leftValue == rightValue ? 1.0 : 0.0;
+                return valuesEqual(leftValue, rightValue);
 
             case tokenType::BANG_EQUAL:
-                return leftValue != rightValue ? 1.0 : 0.0;
+                return !valuesEqual(leftValue, rightValue);
 
             default:
                 throw std::runtime_error("Operador desconocido");
@@ -86,14 +86,14 @@ struct Binary : Expr {
 };
 
 /**
- * @brief Leaf node holding a numeric literal, already parsed to double.
+ * @brief Leaf node holding a number, boolean or nil literal.
  */
 struct Literal : Expr {
-    double value; ///< The literal's value, converted by the Parser with std::stod.
-    explicit Literal(double value) : value(value) {}
+    Value value; ///< The literal's runtime value.
+    explicit Literal(Value value) : value(std::move(value)) {}
 
     /// @return The stored value. Never throws.
-    double eval() override {
+    Value eval() override {
         return value;
     }
 };
@@ -112,7 +112,7 @@ struct Grouping : Expr {
     }
 
     /// @return The inner expression's value, unchanged.
-    double eval() override {
+    Value eval() override {
         return expression->eval();
     }
 };
@@ -120,11 +120,10 @@ struct Grouping : Expr {
 /**
  * @brief Node for a unary prefix operator applied to one operand.
  *
- * Only unary plus and minus exist today; logical not ("!") arrives with
- * issue #16.
+ * Supports unary plus, numeric negation and logical negation.
  */
 struct Unary : Expr {
-    Token op;                    ///< Operator token: PLUS or MINUS.
+    Token op;                    ///< Operator token: PLUS, MINUS or BANG.
     std::unique_ptr<Expr> right; ///< Operand the operator applies to.
 
     Unary(Token op, std::unique_ptr<Expr> right)
@@ -133,15 +132,18 @@ struct Unary : Expr {
 
     /**
      * @brief Evaluates the operand and applies the prefix operator.
-     * @return The operand's value, negated when `op` is MINUS.
+     * @return A number for PLUS/MINUS, or a boolean for BANG.
      * @throws std::runtime_error if `op` is not a supported unary operator.
      */
-    double eval() override {
+    Value eval() override {
+        Value value = right->eval();
         switch (op.type) {
         case tokenType::PLUS:
-            return right->eval();
+            return asNumber(value);
         case tokenType::MINUS:
-            return -right->eval();
+            return -asNumber(value);
+        case tokenType::BANG:
+            return !isTruthy(value);
         default:
             throw std::runtime_error("Operador desconocido");
         }

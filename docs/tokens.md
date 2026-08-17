@@ -1,30 +1,32 @@
-NUMBER -> Numerical value
-PLUS -> +
-MINUS -> -
-STAR -> *
-SLASH -> /
-LPAREN -> (
-RPAREN -> )
-EOF 
+# Tokens
 
-ex:
+| Token | Lexema |
+|---|---|
+| `NUMBER` | Un número entero o decimal |
+| `TRUE` | `true` |
+| `FALSE` | `false` |
+| `NIL` | `nil` |
+| `PLUS` | `+` |
+| `MINUS` | `-` |
+| `STAR` | `*` |
+| `SLASH` | `/` |
+| `BANG` | `!` |
+| `EQUAL_EQUAL` | `==` |
+| `BANG_EQUAL` | `!=` |
+| `LESS` | `<` |
+| `LESS_EQUAL` | `<=` |
+| `GREATER` | `>` |
+| `GREATER_EQUAL` | `>=` |
+| `LPAREN` | `(` |
+| `RPAREN` | `)` |
+| `EOF_TOKEN` | Fin de la entrada |
 
-INPUT
-2+(3*4)/(5-1) 
+Por ejemplo, la entrada `!false == true` produce:
 
-
-TOKENS
-NUMBER(2)
-PLUS
-LPAREN
-NUMBER(3)
-MUL
-NUMBER(4)
-RPAREN
-DIV
-LPAREN
-NUMBER(5)
-MINUS
-NUMBER(1)
-RPAREN
-EOF
+```text
+BANG
+FALSE
+EQUAL_EQUAL
+TRUE
+EOF_TOKEN
+```
