@@ -49,21 +49,17 @@ std::unique_ptr<Expr> Parser::expression() {
     return equality();
 }
 
-// term → factor (('*' | '/') factor)*
-std::unique_ptr<Expr> Parser::term() {
-    auto expr = factor();
+// factor → unary (("*" | "/") unary)*
+std::unique_ptr<Expr> Parser::factor() {
+    auto expr = unary();
 
     while (match(tokenType::STAR) || match(tokenType::SLASH)) {
         Token op = tokens[current - 1];
-        auto right = factor();
+        auto right = unary();
         expr = std::make_unique<Binary>(std::move(expr), op, std::move(right));
     }
 
     return expr;
-}
-
-std::unique_ptr<Expr> Parser::factor() {
-    return unary();
 }
 
 // unary → ("!" | "+" | "-") unary | primary
@@ -117,16 +113,16 @@ std::unique_ptr<Expr> Parser::equality() {
     return expr;
 }
 
-// comparison -> additive ((">" | ">=" | "<" | "<=") additive)*
+// comparison -> term ((">" | ">=" | "<" | "<=") term)*
 std::unique_ptr<Expr> Parser::comparison() {
-    auto expr = additive();
+    auto expr = term();
 
     while (match(tokenType::LESS) ||
            match(tokenType::LESS_EQUAL) ||
            match(tokenType::GREATER) ||
            match(tokenType::GREATER_EQUAL)) {
         Token op = tokens[current - 1];
-        auto right = additive();
+        auto right = term();
 
         expr = std::make_unique<Binary>(
             std::move(expr),
@@ -138,13 +134,13 @@ std::unique_ptr<Expr> Parser::comparison() {
     return expr;
 }
 
-// additive -> term (("+" | "-") term)*
-std::unique_ptr<Expr> Parser::additive() {
-    auto expr = term();
+// term -> factor (("+" | "-") factor)*
+std::unique_ptr<Expr> Parser::term() {
+    auto expr = factor();
 
     while (match(tokenType::PLUS) || match(tokenType::MINUS)) {
         Token op = tokens[current - 1];
-        auto right = term();
+        auto right = factor();
 
         expr = std::make_unique<Binary>(
             std::move(expr),

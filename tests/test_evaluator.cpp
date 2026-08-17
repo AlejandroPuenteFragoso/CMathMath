@@ -32,6 +32,11 @@ TEST_CASE("Evaluador: respeta la precedencia y los paréntesis") {
     CHECK(evalNumber("(2 + 3) * 4") == doctest::Approx(20.0));
 }
 
+TEST_CASE("Evaluador: resta y división son asociativas por la izquierda") {
+    CHECK(evalNumber("10 - 3 - 2") == doctest::Approx(5.0));
+    CHECK(evalNumber("16 / 4 / 2") == doctest::Approx(2.0));
+}
+
 TEST_CASE("Evaluador: el menos unario funciona") {
     CHECK(evalNumber("-5")     == doctest::Approx(-5.0));
     CHECK(evalNumber("3 * -2") == doctest::Approx(-6.0));

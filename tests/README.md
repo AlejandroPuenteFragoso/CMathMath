@@ -49,4 +49,4 @@ TEST_CASE("descripción clara de lo que se prueba") {
 ## Pendientes (ver issues)
 
 - **#15** comparación e igualdad · **#17** doble evaluación
-- **#26** carácter inválido debe lanzar error · **#27** asociatividad tras renombrar reglas
+- **#26** carácter inválido debe lanzar error

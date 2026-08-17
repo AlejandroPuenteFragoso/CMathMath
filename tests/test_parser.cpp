@@ -84,5 +84,23 @@ TEST_CASE("Parser: construye negación lógica unaria") {
     REQUIRE(std::holds_alternative<bool>(literal->value));
     CHECK_FALSE(std::get<bool>(literal->value));
 }
-// TODO(Alex, #27): tras renombrar term/factor para alinearlos con la gramática,
-//   añadir tests de asociatividad que fijen la precedencia (p. ej. 2 - 3 - 4).
+
+TEST_CASE("Parser: resta y división son asociativas por la izquierda") {
+    auto subtractionAst = parse("10 - 3 - 2");
+    auto* subtraction = dynamic_cast<Binary*>(subtractionAst.get());
+    REQUIRE(subtraction != nullptr);
+    CHECK(subtraction->op.type == tokenType::MINUS);
+
+    auto* subtractionLeft = dynamic_cast<Binary*>(subtraction->left.get());
+    REQUIRE(subtractionLeft != nullptr);
+    CHECK(subtractionLeft->op.type == tokenType::MINUS);
+
+    auto divisionAst = parse("16 / 4 / 2");
+    auto* division = dynamic_cast<Binary*>(divisionAst.get());
+    REQUIRE(division != nullptr);
+    CHECK(division->op.type == tokenType::SLASH);
+
+    auto* divisionLeft = dynamic_cast<Binary*>(division->left.get());
+    REQUIRE(divisionLeft != nullptr);
+    CHECK(divisionLeft->op.type == tokenType::SLASH);
+}

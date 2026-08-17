@@ -12,10 +12,9 @@
  *
  *   expression -> equality
  *   equality   -> comparison (("==" | "!=") comparison)*
- *   comparison -> additive ((">" | ">=" | "<" | "<=") additive)*
- *   additive   -> term (("+" | "-") term)*
- *   term       -> factor (("*" | "/") factor)*
- *   factor     -> unary
+ *   comparison -> term ((">" | ">=" | "<" | "<=") term)*
+ *   term       -> factor (("+" | "-") factor)*
+ *   factor     -> unary (("*" | "/") unary)*
  *   unary      -> ("!" | "+" | "-") unary | primary
  *   primary    -> NUMBER | "true" | "false" | "nil" | "(" expression ")"
  *
@@ -52,9 +51,9 @@ private:
 
     /// @brief expression -> equality. Entry rule, lowest precedence.
     std::unique_ptr<Expr> expression();
-    /// @brief term -> factor (("*" | "/") factor)*. Left-associative.
+    /// @brief term -> factor (("+" | "-") factor)*. Left-associative.
     std::unique_ptr<Expr> term();
-    /// @brief factor -> unary. Passthrough level (see issue #27).
+    /// @brief factor -> unary (("*" | "/") unary)*. Left-associative.
     std::unique_ptr<Expr> factor();
     /// @brief unary -> ("!" | "+" | "-") unary | primary. Right-associative by recursion.
     std::unique_ptr<Expr> unary();
@@ -68,10 +67,8 @@ private:
      *        chains like "a == b == c" parse as "(a == b) == c" (see issue #39).
      */
     std::unique_ptr<Expr> equality();
-    /// @brief comparison -> additive ((">" | ">=" | "<" | "<=") additive)*. Left-associative.
+    /// @brief comparison -> term ((">" | ">=" | "<" | "<=") term)*. Left-associative.
     std::unique_ptr<Expr> comparison();
-    /// @brief additive -> term (("+" | "-") term)*. Left-associative.
-    std::unique_ptr<Expr> additive();
 
     /// @brief Consumes the current token. @return The token just consumed.
     Token advance();
