@@ -32,7 +32,7 @@ O ejecutar el binario de tests directamente (salida más detallada):
 | `test_main.cpp`       | Genera el `main()` de doctest (no editar).        |
 | `test_lexer.cpp`      | Tokenización: números, operadores, espacios.      |
 | `test_parser.cpp`     | Construcción del AST y rechazo de entradas inválidas. |
-| `test_evaluator.cpp`  | Resultado numérico de evaluar el AST.             |
+| `test_evaluator.cpp`  | Valores y errores producidos al evaluar el AST.    |
 
 ## Cómo agregar un test
 
@@ -48,5 +48,5 @@ TEST_CASE("descripción clara de lo que se prueba") {
 
 ## Pendientes (ver issues)
 
-- **#15** comparación e igualdad · **#16** booleanos/nil/`!` · **#17** doble evaluación
-- **#26** carácter inválido debe lanzar error · **#27** asociatividad tras renombrar reglas
+- **#15** comparación e igualdad · **#17** doble evaluación
+- **#26** carácter inválido debe lanzar error

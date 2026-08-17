@@ -86,6 +86,16 @@ void Lexer::scanNumber()
     tokens.push_back(Token(tokenType::NUMBER, lexeme));
 }
 
+void Lexer::scanIdentifier()
+{
+    while (std::isalnum(static_cast<unsigned char>(peek())) || peek() == '_') {
+        advance();
+    }
+
+    std::string lexeme = input.substr(start, current - start);
+    tokens.push_back(Token(createToken(lexeme), lexeme));
+}
+
 void Lexer::scanTokens()
 {
     while (!isAtEnd()) {
@@ -99,14 +109,39 @@ void Lexer::scanTokens()
             continue;
         }
 
+        if (std::isalpha(static_cast<unsigned char>(peek())) || peek() == '_') {
+            scanIdentifier();
+            continue;
+        }
+
         char c = peek();
         advance();
-        std::string tokenValue(1, c);
-        tokenType type = createToken(tokenValue);
-        if (type == tokenType::UNKNOWN) {
-            throw std::runtime_error(
-            std::string("Caracter inesperado: '") + c + "'");
+
+        // Handle multi-character operators: ==, !=, <=, >=
+        std::string tokenValue;
+        switch (c) {
+        case '=':
+            if (peek() == '=') { advance(); tokenValue = "=="; }
+            else { tokenValue = "="; }
+            break;
+        case '!':
+            if (peek() == '=') { advance(); tokenValue = "!="; }
+            else { tokenValue = "!"; }
+            break;
+        case '<':
+            if (peek() == '=') { advance(); tokenValue = "<="; }
+            else { tokenValue = "<"; }
+            break;
+        case '>':
+            if (peek() == '=') { advance(); tokenValue = ">="; }
+            else { tokenValue = ">"; }
+            break;
+        default:
+            tokenValue = std::string(1, c);
+            break;
         }
+
+        tokenType type = createToken(tokenValue);
         tokens.push_back(Token(type, tokenValue));
     }
     tokens.push_back(Token(tokenType::EOF_TOKEN, ""));
@@ -120,6 +155,17 @@ tokenType Lexer::createToken(const std::string& value)
     if (value == "/") return tokenType::SLASH;
     if (value == "(") return tokenType::LPAREN;
     if (value == ")") return tokenType::RPAREN;
+    if (value == "!") return tokenType::BANG;
+    // Comparison / equality operators
+    if (value == "==") return tokenType::EQUAL_EQUAL;
+    if (value == "!=") return tokenType::BANG_EQUAL;
+    if (value == "<") return tokenType::LESS;
+    if (value == "<=") return tokenType::LESS_EQUAL;
+    if (value == ">") return tokenType::GREATER;
+    if (value == ">=") return tokenType::GREATER_EQUAL;
+    if (value == "true") return tokenType::TRUE;
+    if (value == "false") return tokenType::FALSE;
+    if (value == "nil") return tokenType::NIL;
 
     // Check if the string represents a number (integer or floating)
     if (!value.empty()) {
@@ -141,7 +187,9 @@ tokenType Lexer::createToken(const std::string& value)
         if (hasDigits) return tokenType::NUMBER;
     }
 
-    return tokenType::UNKNOWN;
+    throw std::runtime_error(
+        "Unexpected character: " + value
+    );
 }
 
 

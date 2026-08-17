@@ -45,7 +45,7 @@ int main() {
 
             std::cout << "AST creado exitosamente\n";
             parser.printAST(ast.get());
-            std::cout << "Resultado: " << result << "\n";
+            std::cout << "Resultado: " << valueToString(result) << "\n";
         }
         catch (const std::exception& e) {
             std::cout << "Error: " << e.what() << "\n";
