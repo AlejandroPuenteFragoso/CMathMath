@@ -49,26 +49,22 @@ std::unique_ptr<Expr> Parser::expression() {
     return equality();
 }
 
-// term → factor (('*' | '/') factor)*
-std::unique_ptr<Expr> Parser::term() {
-    auto expr = factor();
+// factor → unary (("*" | "/") unary)*
+std::unique_ptr<Expr> Parser::factor() {
+    auto expr = unary();
 
     while (match(tokenType::STAR) || match(tokenType::SLASH)) {
         Token op = tokens[current - 1];
-        auto right = factor();
+        auto right = unary();
         expr = std::make_unique<Binary>(std::move(expr), op, std::move(right));
     }
 
     return expr;
 }
 
-std::unique_ptr<Expr> Parser::factor() {
-    return unary();
-}
-
-// factor → unary
+// unary → ("!" | "+" | "-") unary | primary
 std::unique_ptr<Expr> Parser::unary() {
-    if (match(tokenType::PLUS) || match(tokenType::MINUS)) {
+    if (match(tokenType::BANG) || match(tokenType::PLUS) || match(tokenType::MINUS)) {
         Token op = tokens[current - 1];
         auto expr = unary();
         return std::make_unique<Unary>(op, std::move(expr));
@@ -77,8 +73,20 @@ std::unique_ptr<Expr> Parser::unary() {
     return primary();
 }
 
-// primary → NUMBER | '(' expression ')'
+// primary → NUMBER | "true" | "false" | "nil" | '(' expression ')'
 std::unique_ptr<Expr> Parser::primary() {
+    if (match(tokenType::FALSE)) {
+        return std::make_unique<Literal>(false);
+    }
+
+    if (match(tokenType::TRUE)) {
+        return std::make_unique<Literal>(true);
+    }
+
+    if (match(tokenType::NIL)) {
+        return std::make_unique<Literal>(std::monostate{});
+    }
+
     if (match(tokenType::NUMBER)) {
         double value = std::stod(tokens[current - 1].lexeme);
         return std::make_unique<Literal>(value);
@@ -92,7 +100,7 @@ std::unique_ptr<Expr> Parser::primary() {
         return std::make_unique<Grouping>(std::move(expr));
     }
 
-    throw std::runtime_error("Expected number or '('");
+    throw std::runtime_error("Expected literal or '('");
 }
 
 // equality -> comparison (("==" | "!=") comparison)*
@@ -105,16 +113,16 @@ std::unique_ptr<Expr> Parser::equality() {
     return expr;
 }
 
-// comparison -> additive ((">" | ">=" | "<" | "<=") additive)*
+// comparison -> term ((">" | ">=" | "<" | "<=") term)*
 std::unique_ptr<Expr> Parser::comparison() {
-    auto expr = additive();
+    auto expr = term();
 
     while (match(tokenType::LESS) ||
            match(tokenType::LESS_EQUAL) ||
            match(tokenType::GREATER) ||
            match(tokenType::GREATER_EQUAL)) {
         Token op = tokens[current - 1];
-        auto right = additive();
+        auto right = term();
 
         expr = std::make_unique<Binary>(
             std::move(expr),
@@ -126,13 +134,13 @@ std::unique_ptr<Expr> Parser::comparison() {
     return expr;
 }
 
-// additive -> term (("+" | "-") term)*
-std::unique_ptr<Expr> Parser::additive() {
-    auto expr = term();
+// term -> factor (("+" | "-") factor)*
+std::unique_ptr<Expr> Parser::term() {
+    auto expr = factor();
 
     while (match(tokenType::PLUS) || match(tokenType::MINUS)) {
         Token op = tokens[current - 1];
-        auto right = term();
+        auto right = factor();
 
         expr = std::make_unique<Binary>(
             std::move(expr),
@@ -148,7 +156,7 @@ void Parser::printAST(Expr* expr, int indent) {
     std::string spaces(indent * 2, ' ');
 
     if (auto lit = dynamic_cast<Literal*>(expr)) {
-        std::cout << spaces << "Literal: " << lit->value << std::endl;
+        std::cout << spaces << "Literal: " << valueToString(lit->value) << std::endl;
     }
     else if (auto unary = dynamic_cast<Unary*>(expr)) {
         std::cout << spaces << "Unary: " << unary->op.lexeme << std::endl;

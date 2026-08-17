@@ -44,7 +44,8 @@ TEST_CASE("Parser: igualdad tiene menor precedencia que suma") {
 
     auto* right = dynamic_cast<Literal*>(equality->right.get());
     REQUIRE(right != nullptr);
-    CHECK(right->value == 2.0);
+    REQUIRE(std::holds_alternative<double>(right->value));
+    CHECK(std::get<double>(right->value) == 2.0);
 }
 
 TEST_CASE("Parser: comparacion tiene mayor precedencia que igualdad") {
@@ -58,5 +59,48 @@ TEST_CASE("Parser: comparacion tiene mayor precedencia que igualdad") {
     REQUIRE(comparison != nullptr);
     CHECK(comparison->op.type == tokenType::LESS);
 }
-// TODO(Alex, #27): tras renombrar term/factor para alinearlos con la gramática,
-//   añadir tests de asociatividad que fijen la precedencia (p. ej. 2 - 3 - 4).
+
+TEST_CASE("Parser: construye literales booleanos y nil") {
+    auto trueAst = parse("true");
+    auto* trueLiteral = dynamic_cast<Literal*>(trueAst.get());
+    REQUIRE(trueLiteral != nullptr);
+    REQUIRE(std::holds_alternative<bool>(trueLiteral->value));
+    CHECK(std::get<bool>(trueLiteral->value));
+
+    auto nilAst = parse("nil");
+    auto* nilLiteral = dynamic_cast<Literal*>(nilAst.get());
+    REQUIRE(nilLiteral != nullptr);
+    CHECK(std::holds_alternative<std::monostate>(nilLiteral->value));
+}
+
+TEST_CASE("Parser: construye negación lógica unaria") {
+    auto ast = parse("!false");
+    auto* unary = dynamic_cast<Unary*>(ast.get());
+    REQUIRE(unary != nullptr);
+    CHECK(unary->op.type == tokenType::BANG);
+
+    auto* literal = dynamic_cast<Literal*>(unary->right.get());
+    REQUIRE(literal != nullptr);
+    REQUIRE(std::holds_alternative<bool>(literal->value));
+    CHECK_FALSE(std::get<bool>(literal->value));
+}
+
+TEST_CASE("Parser: resta y división son asociativas por la izquierda") {
+    auto subtractionAst = parse("10 - 3 - 2");
+    auto* subtraction = dynamic_cast<Binary*>(subtractionAst.get());
+    REQUIRE(subtraction != nullptr);
+    CHECK(subtraction->op.type == tokenType::MINUS);
+
+    auto* subtractionLeft = dynamic_cast<Binary*>(subtraction->left.get());
+    REQUIRE(subtractionLeft != nullptr);
+    CHECK(subtractionLeft->op.type == tokenType::MINUS);
+
+    auto divisionAst = parse("16 / 4 / 2");
+    auto* division = dynamic_cast<Binary*>(divisionAst.get());
+    REQUIRE(division != nullptr);
+    CHECK(division->op.type == tokenType::SLASH);
+
+    auto* divisionLeft = dynamic_cast<Binary*>(division->left.get());
+    REQUIRE(divisionLeft != nullptr);
+    CHECK(divisionLeft->op.type == tokenType::SLASH);
+}

@@ -44,13 +44,13 @@ public:
 	/**
 	 * @brief Tokenizes the entire input and stores the result.
 	 *
-	 * Recognizes numeric literals, arithmetic operators, parentheses and the
+	 * Recognizes numeric and logical literals, arithmetic operators, parentheses and the
 	 * comparison/equality operators, including the two-character forms
 	 * ("==", "!=", "<=", ">="). Always appends a final EOF_TOKEN sentinel.
 	 * Call it once per Lexer: a second call would append a duplicate stream.
 	 *
 	 * @throws std::runtime_error if the input contains a malformed number or
-	 *         any character outside the language (a lone '=' or '!' included).
+	 *         any character or word outside the language (a lone '=' included).
 	 */
 	void scanTokens();
 
@@ -66,8 +66,14 @@ public:
 	void scanNumber();
 
 	/**
+	 * @brief Scans a keyword (`true`, `false` or `nil`) and appends its token.
+	 * @throws std::runtime_error when the scanned word is not a language keyword.
+	 */
+	void scanIdentifier();
+
+	/**
 	 * @brief Classifies an operator or parenthesis lexeme.
-	 * @param value Lexeme to classify, e.g. "+", "(", "<=".
+	 * @param value Lexeme to classify, e.g. "+", "(", "<=", "true".
 	 * @return The matching category; NUMBER when the lexeme is a numeric string.
 	 * @throws std::runtime_error ("Unexpected character: ...") when the lexeme
 	 *         is not part of the language. This is what rejects invalid input

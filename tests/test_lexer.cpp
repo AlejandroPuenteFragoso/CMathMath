@@ -72,7 +72,22 @@ TEST_CASE("Lexer: reconoce operadores de comparacion e igualdad") {
     CHECK(tokens[6].type == tokenType::EOF_TOKEN);
     CHECK(tokens[6].lexeme.empty());
 }
-// TODO(Alex, #16): añadir casos para las palabras clave true/false/nil y el operador !.
+TEST_CASE("Lexer: reconoce booleanos, nil y el operador lógico") {
+    Lexer lexer("true false nil !");
+    lexer.scanTokens();
+    const auto& tokens = lexer.getTokens();
+
+    REQUIRE(tokens.size() == 5);
+    CHECK(tokens[0].type == tokenType::TRUE);
+    CHECK(tokens[0].lexeme == "true");
+    CHECK(tokens[1].type == tokenType::FALSE);
+    CHECK(tokens[1].lexeme == "false");
+    CHECK(tokens[2].type == tokenType::NIL);
+    CHECK(tokens[2].lexeme == "nil");
+    CHECK(tokens[3].type == tokenType::BANG);
+    CHECK(tokens[3].lexeme == "!");
+    CHECK(tokens[4].type == tokenType::EOF_TOKEN);
+}
 
 TEST_CASE("Lexer rechaza caracteres invalidos") {
     Lexer lexerEqual("5 = 5");
@@ -81,15 +96,17 @@ TEST_CASE("Lexer rechaza caracteres invalidos") {
         "Unexpected character: ="
     );
 
-    Lexer lexerBang("3 ! 2");
-    CHECK_THROWS_WITH(
-        lexerBang.scanTokens(),
-        "Unexpected character: !"
-    );
-
     Lexer lexerUnknown("5 @ 5");
     CHECK_THROWS_WITH(
         lexerUnknown.scanTokens(),
         "Unexpected character: @"
+    );
+}
+
+TEST_CASE("Lexer rechaza palabras desconocidas") {
+    Lexer lexer("truth");
+    CHECK_THROWS_WITH(
+        lexer.scanTokens(),
+        "Unexpected character: truth"
     );
 }

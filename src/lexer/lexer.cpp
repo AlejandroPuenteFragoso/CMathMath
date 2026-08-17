@@ -86,6 +86,16 @@ void Lexer::scanNumber()
     tokens.push_back(Token(tokenType::NUMBER, lexeme));
 }
 
+void Lexer::scanIdentifier()
+{
+    while (std::isalnum(static_cast<unsigned char>(peek())) || peek() == '_') {
+        advance();
+    }
+
+    std::string lexeme = input.substr(start, current - start);
+    tokens.push_back(Token(createToken(lexeme), lexeme));
+}
+
 void Lexer::scanTokens()
 {
     while (!isAtEnd()) {
@@ -96,6 +106,11 @@ void Lexer::scanTokens()
 
         if (std::isdigit(peek())) {
             scanNumber();
+            continue;
+        }
+
+        if (std::isalpha(static_cast<unsigned char>(peek())) || peek() == '_') {
+            scanIdentifier();
             continue;
         }
 
@@ -140,6 +155,7 @@ tokenType Lexer::createToken(const std::string& value)
     if (value == "/") return tokenType::SLASH;
     if (value == "(") return tokenType::LPAREN;
     if (value == ")") return tokenType::RPAREN;
+    if (value == "!") return tokenType::BANG;
     // Comparison / equality operators
     if (value == "==") return tokenType::EQUAL_EQUAL;
     if (value == "!=") return tokenType::BANG_EQUAL;
@@ -147,6 +163,9 @@ tokenType Lexer::createToken(const std::string& value)
     if (value == "<=") return tokenType::LESS_EQUAL;
     if (value == ">") return tokenType::GREATER;
     if (value == ">=") return tokenType::GREATER_EQUAL;
+    if (value == "true") return tokenType::TRUE;
+    if (value == "false") return tokenType::FALSE;
+    if (value == "nil") return tokenType::NIL;
 
     // Check if the string represents a number (integer or floating)
     if (!value.empty()) {
