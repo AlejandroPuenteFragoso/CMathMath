@@ -79,7 +79,7 @@ struct Binary : Expr {
                 return !valuesEqual(leftValue, rightValue);
 
             default:
-                throw std::runtime_error("Operador desconocido");
+                throw std::runtime_error("Unknown operator");
 		}
     }
 
@@ -145,7 +145,7 @@ struct Unary : Expr {
         case tokenType::BANG:
             return !isTruthy(value);
         default:
-            throw std::runtime_error("Operador desconocido");
+            throw std::runtime_error("Unknown operator");
         }
     }
 };

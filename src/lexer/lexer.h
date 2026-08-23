@@ -20,7 +20,7 @@ public:
 	 */
 	Lexer(const std::string& input);
 
-	/// @brief Moves the cursor one character forward. Does not check bounds.
+	/// @brief Moves the cursor one character forward and updates its source position.
 	void advance();
 
 	/**
@@ -91,5 +91,9 @@ private:
 	std::string input;         ///< Full source text being scanned.
 	size_t current = 0;        ///< Cursor: index of the next character to consume.
 	size_t start = 0;          ///< Index where the lexeme in progress begins.
+	int currentLine = 1;       ///< Line containing the next character to consume.
+	int currentColumn = 1;     ///< Column containing the next character to consume.
+	int startLine = 1;         ///< Line where the lexeme in progress begins.
+	int startColumn = 1;       ///< Column where the lexeme in progress begins.
 	std::vector<Token> tokens; ///< Output, filled by scanTokens().
 };

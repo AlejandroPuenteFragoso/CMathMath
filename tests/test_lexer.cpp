@@ -11,9 +11,17 @@ TEST_CASE("Lexer: tokeniza una suma simple") {
     REQUIRE(tokens.size() == 4); // NUMBER PLUS NUMBER EOF
     CHECK(tokens[0].type == tokenType::NUMBER);
     CHECK(tokens[0].lexeme == "1");
+    CHECK(tokens[0].line == 1);
+    CHECK(tokens[0].column == 1);
     CHECK(tokens[1].type == tokenType::PLUS);
+    CHECK(tokens[1].line == 1);
+    CHECK(tokens[1].column == 2);
     CHECK(tokens[2].type == tokenType::NUMBER);
+    CHECK(tokens[2].line == 1);
+    CHECK(tokens[2].column == 3);
     CHECK(tokens[3].type == tokenType::EOF_TOKEN);
+    CHECK(tokens[3].line == 1);
+    CHECK(tokens[3].column == 4);
 }
 
 TEST_CASE("Lexer: reconoce números decimales de varios dígitos") {
@@ -35,6 +43,38 @@ TEST_CASE("Lexer: ignora los espacios en blanco") {
     CHECK(tokens[0].lexeme == "7");
     CHECK(tokens[1].type == tokenType::STAR);
     CHECK(tokens[2].type == tokenType::LPAREN);
+}
+
+TEST_CASE("Lexer: preserves the initial position across multiple lines") {
+    Lexer lexer("12 +\n  true <= 3.5");
+    lexer.scanTokens();
+    const auto& tokens = lexer.getTokens();
+
+    REQUIRE(tokens.size() == 6);
+
+    CHECK(tokens[0].lexeme == "12");
+    CHECK(tokens[0].line == 1);
+    CHECK(tokens[0].column == 1);
+
+    CHECK(tokens[1].lexeme == "+");
+    CHECK(tokens[1].line == 1);
+    CHECK(tokens[1].column == 4);
+
+    CHECK(tokens[2].lexeme == "true");
+    CHECK(tokens[2].line == 2);
+    CHECK(tokens[2].column == 3);
+
+    CHECK(tokens[3].lexeme == "<=");
+    CHECK(tokens[3].line == 2);
+    CHECK(tokens[3].column == 8);
+
+    CHECK(tokens[4].lexeme == "3.5");
+    CHECK(tokens[4].line == 2);
+    CHECK(tokens[4].column == 11);
+
+    CHECK(tokens[5].type == tokenType::EOF_TOKEN);
+    CHECK(tokens[5].line == 2);
+    CHECK(tokens[5].column == 14);
 }
 
 
@@ -93,13 +133,27 @@ TEST_CASE("Lexer rechaza caracteres invalidos") {
     Lexer lexerEqual("5 = 5");
     CHECK_THROWS_WITH(
         lexerEqual.scanTokens(),
-        "Unexpected character: ="
+        "Error [line 1, column 3]: Unexpected character: ="
     );
 
     Lexer lexerUnknown("5 @ 5");
     CHECK_THROWS_WITH(
         lexerUnknown.scanTokens(),
-        "Unexpected character: @"
+        "Error [line 1, column 3]: Unexpected character: @"
+    );
+}
+
+TEST_CASE("Lexer: errors include the exact position") {
+    Lexer lexerUnknown("1 +\n  @");
+    CHECK_THROWS_WITH(
+        lexerUnknown.scanTokens(),
+        "Error [line 2, column 3]: Unexpected character: @"
+    );
+
+    Lexer lexerInvalidNumber("1.2.3");
+    CHECK_THROWS_WITH(
+        lexerInvalidNumber.scanTokens(),
+        "Error [line 1, column 4]: Invalid number format: multiple decimal points"
     );
 }
 
@@ -107,6 +161,6 @@ TEST_CASE("Lexer rechaza palabras desconocidas") {
     Lexer lexer("truth");
     CHECK_THROWS_WITH(
         lexer.scanTokens(),
-        "Unexpected character: truth"
+        "Error [line 1, column 1]: Unexpected character: truth"
     );
 }
