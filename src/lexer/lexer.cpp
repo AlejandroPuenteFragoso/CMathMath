@@ -4,13 +4,37 @@
 #include <stdexcept>
 #include "tokenType.h"
 
+namespace {
+
+std::runtime_error sourceError(int line, int column, const std::string& message)
+{
+    return std::runtime_error(
+        "Error [line " + std::to_string(line) +
+        ", column " + std::to_string(column) + "]: " + message
+    );
+}
+
+bool isDigit(char c)
+{
+    return std::isdigit(static_cast<unsigned char>(c)) != 0;
+}
+
+} // namespace
+
 Lexer::Lexer(const std::string& input) : input(input)
 {
 }
 
 void Lexer::advance()
 {
+	char c = input[current];
 	current++;
+	if (c == '\n') {
+		currentLine++;
+		currentColumn = 1;
+	} else {
+		currentColumn++;
+	}
 }
 
 char Lexer::peek()
@@ -49,41 +73,38 @@ const std::vector<Token>& Lexer::getTokens() const
 
 void Lexer::scanNumber()
 {
-    bool hasDot = false;
-
     // Consume integer part
-    while (std::isdigit(peek())) {
+    while (isDigit(peek())) {
         advance();
     }
 
     // Optional decimal part
     if (peek() == '.') {
 
-        if (hasDot) {
-            throw std::runtime_error("Invalid number format: multiple decimal points");
-        }
-
-        hasDot = true;
         advance(); // consume '.'
 
         // Require at least one digit after '.'
-        if (!std::isdigit(peek())) {
-            throw std::runtime_error("Invalid number format");
+        if (!isDigit(peek())) {
+            throw sourceError(currentLine, currentColumn, "Invalid number format");
         }
 
-        while (std::isdigit(peek())) {
+        while (isDigit(peek())) {
             advance();
         }
     }
 
     // Detect second decimal point
     if (peek() == '.') {
-        throw std::runtime_error("Invalid number format: multiple decimal points");
+        throw sourceError(
+            currentLine,
+            currentColumn,
+            "Invalid number format: multiple decimal points"
+        );
     }
 
     std::string lexeme = input.substr(start, current - start);
 
-    tokens.push_back(Token(tokenType::NUMBER, lexeme));
+    tokens.emplace_back(tokenType::NUMBER, lexeme, startLine, startColumn);
 }
 
 void Lexer::scanIdentifier()
@@ -93,7 +114,7 @@ void Lexer::scanIdentifier()
     }
 
     std::string lexeme = input.substr(start, current - start);
-    tokens.push_back(Token(createToken(lexeme), lexeme));
+    tokens.emplace_back(createToken(lexeme), lexeme, startLine, startColumn);
 }
 
 void Lexer::scanTokens()
@@ -103,8 +124,10 @@ void Lexer::scanTokens()
         if (isAtEnd()) break;
 
 		start = current;  // avoid blank spaces on the left of the lexeme
+		startLine = currentLine;
+		startColumn = currentColumn;
 
-        if (std::isdigit(peek())) {
+        if (isDigit(peek())) {
             scanNumber();
             continue;
         }
@@ -142,9 +165,9 @@ void Lexer::scanTokens()
         }
 
         tokenType type = createToken(tokenValue);
-        tokens.push_back(Token(type, tokenValue));
+        tokens.emplace_back(type, tokenValue, startLine, startColumn);
     }
-    tokens.push_back(Token(tokenType::EOF_TOKEN, ""));
+    tokens.emplace_back(tokenType::EOF_TOKEN, "", currentLine, currentColumn);
 }
 
 tokenType Lexer::createToken(const std::string& value)
@@ -187,7 +210,9 @@ tokenType Lexer::createToken(const std::string& value)
         if (hasDigits) return tokenType::NUMBER;
     }
 
-    throw std::runtime_error(
+    throw sourceError(
+        startLine,
+        startColumn,
         "Unexpected character: " + value
     );
 }

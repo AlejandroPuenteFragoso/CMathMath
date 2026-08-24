@@ -18,10 +18,14 @@ public:
      * @param type   Category the Parser will dispatch on.
      * @param lexeme Verbatim source text of the token. Empty only for the
      *               EOF_TOKEN sentinel.
+     * @param line   One-based line where the token begins.
+     * @param column One-based column where the token begins.
      */
-    Token(tokenType type, const std::string& lexeme)
-        : type(type), lexeme(lexeme) {}
+    Token(tokenType type, const std::string& lexeme, int line, int column)
+        : type(type), lexeme(lexeme), line(line), column(column) {}
 
     tokenType type;     ///< Category the Parser dispatches on.
     std::string lexeme; ///< Verbatim source text; for NUMBER it is parseable by std::stod.
+    int line;           ///< One-based line where the token begins.
+    int column;         ///< One-based column where the token begins.
 };

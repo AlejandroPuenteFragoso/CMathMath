@@ -20,15 +20,31 @@ TEST_CASE("Parser: una expresión válida construye un AST") {
 }
 
 TEST_CASE("Parser: tokens sobrantes son un error") {
-    CHECK_THROWS(parse("1 2"));
+    CHECK_THROWS_WITH(
+        parse("1 2"),
+        "Error [line 1, column 3]: Unexpected token '2' after expression"
+    );
 }
 
 TEST_CASE("Parser: falta el paréntesis de cierre") {
-    CHECK_THROWS(parse("(1 + 2"));
+    CHECK_THROWS_WITH(
+        parse("(3 + 4"),
+        "Error [line 1, column 7]: Expected ')' after expression"
+    );
 }
 
 TEST_CASE("Parser: un operador sin operando derecho es un error") {
-    CHECK_THROWS(parse("3 +"));
+    CHECK_THROWS_WITH(
+        parse("3 +"),
+        "Error [line 1, column 4]: Expected expression, found <end of input>"
+    );
+}
+
+TEST_CASE("Parser: an unexpected token includes its position") {
+    CHECK_THROWS_WITH(
+        parse("1 + * 2"),
+        "Error [line 1, column 5]: Expected expression, found '*'"
+    );
 }
 
 TEST_CASE("Parser: igualdad tiene menor precedencia que suma") {

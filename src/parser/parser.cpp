@@ -2,6 +2,26 @@
 #include <stdexcept>
 #include <iostream>
 
+namespace {
+
+std::string describeToken(const Token& token)
+{
+    if (token.type == tokenType::EOF_TOKEN) {
+        return "<end of input>";
+    }
+    return "'" + token.lexeme + "'";
+}
+
+[[noreturn]] void throwParserError(const Token& token, const std::string& message)
+{
+    throw std::runtime_error(
+        "Error [line " + std::to_string(token.line) +
+        ", column " + std::to_string(token.column) + "]: " + message
+    );
+}
+
+} // namespace
+
 Parser::Parser(const std::vector<Token>& tokens)
     : tokens(tokens), current(0) {
 }
@@ -9,7 +29,11 @@ Parser::Parser(const std::vector<Token>& tokens)
 std::unique_ptr<Expr> Parser::parse() {
     auto expr = expression();
     if (!isAtEnd() || peek().type != tokenType::EOF_TOKEN) {
-        throw std::runtime_error("Unexpected tokens after expression.");
+        Token token = peek();
+        throwParserError(
+            token,
+            "Unexpected token " + describeToken(token) + " after expression"
+        );
     }
     return expr;
 }
@@ -95,12 +119,16 @@ std::unique_ptr<Expr> Parser::primary() {
     if (match(tokenType::LPAREN)) {
         auto expr = expression();
         if (!match(tokenType::RPAREN)) {
-            throw std::runtime_error("Expected ')' after expression");
+            throwParserError(peek(), "Expected ')' after expression");
         }
         return std::make_unique<Grouping>(std::move(expr));
     }
 
-    throw std::runtime_error("Expected literal or '('");
+    Token token = peek();
+    throwParserError(
+        token,
+        "Expected expression, found " + describeToken(token)
+    );
 }
 
 // equality -> comparison (("==" | "!=") comparison)*
