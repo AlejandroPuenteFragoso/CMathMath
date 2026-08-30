@@ -69,6 +69,8 @@ TEST_CASE("Evaluador: respeta precedencia en expresiones relacionales") {
     CHECK(evalBoolean("1 + 2 * 3 == 7"));
     CHECK_FALSE(evalBoolean("1 + 2 > 2 * 2"));
     CHECK(evalBoolean("(1 + 2) * 3 <= 9"));
+    CHECK(evalBoolean("1 < 2 == true"));
+    CHECK(evalBoolean("(1 < 2) == true"));
 }
 
 TEST_CASE("Evaluador: reconoce booleanos y nil") {

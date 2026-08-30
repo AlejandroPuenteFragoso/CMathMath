@@ -76,6 +76,38 @@ TEST_CASE("Parser: comparacion tiene mayor precedencia que igualdad") {
     CHECK(comparison->op.type == tokenType::LESS);
 }
 
+TEST_CASE("Parser: rechaza comparaciones de orden encadenadas") {
+    CHECK_THROWS_WITH(
+        parse("1 < 2 < 3"),
+        "Error [line 1, column 7]: Chained comparisons are not supported"
+    );
+    CHECK_THROWS_WITH(
+        parse("3 > 2 >= 1"),
+        "Error [line 1, column 7]: Chained comparisons are not supported"
+    );
+    CHECK_THROWS_WITH(
+        parse("1 <= 2 > 0"),
+        "Error [line 1, column 8]: Chained comparisons are not supported"
+    );
+}
+
+TEST_CASE("Parser: rechaza igualdades encadenadas") {
+    CHECK_THROWS_WITH(
+        parse("1 == 1 == true"),
+        "Error [line 1, column 8]: Chained comparisons are not supported"
+    );
+    CHECK_THROWS_WITH(
+        parse("1 != 2 != false"),
+        "Error [line 1, column 8]: Chained comparisons are not supported"
+    );
+}
+
+TEST_CASE("Parser: permite comparaciones agrupadas o en distintos niveles") {
+    CHECK_NOTHROW(parse("1 < 2 == true"));
+    CHECK_NOTHROW(parse("(1 < 2) == true"));
+    CHECK_NOTHROW(parse("(1 < 2) == (2 < 3)"));
+}
+
 TEST_CASE("Parser: construye literales booleanos y nil") {
     auto trueAst = parse("true");
     auto* trueLiteral = dynamic_cast<Literal*>(trueAst.get());
