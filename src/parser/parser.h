@@ -11,8 +11,8 @@
  * from lowest to highest precedence:
  *
  *   expression -> equality
- *   equality   -> comparison (("==" | "!=") comparison)*
- *   comparison -> term ((">" | ">=" | "<" | "<=") term)*
+ *   equality   -> comparison (("==" | "!=") comparison)?
+ *   comparison -> term ((">" | ">=" | "<" | "<=") term)?
  *   term       -> factor (("+" | "-") factor)*
  *   factor     -> unary (("*" | "/") unary)*
  *   unary      -> ("!" | "+" | "-") unary | primary
@@ -33,8 +33,8 @@ public:
      * @brief Parses the whole token stream as a single expression.
      * @return Root of the resulting AST; evaluate it with Expr::eval().
      * @throws std::runtime_error if the stream is not one well-formed
-     *         expression: unexpected token, missing ')' or trailing tokens
-     *         after the expression (e.g. "1 2").
+     *         expression: unexpected token, missing ')', chained comparisons
+     *         or trailing tokens after the expression (e.g. "1 2").
      */
     std::unique_ptr<Expr> parse();
 
@@ -62,12 +62,9 @@ private:
      * @throws std::runtime_error on any other token, or if the ')' is missing.
      */
     std::unique_ptr<Expr> primary();
-    /**
-     * @brief equality -> comparison (("==" | "!=") comparison)*. Left-associative:
-     *        chains like "a == b == c" parse as "(a == b) == c" (see issue #39).
-     */
+    /// @brief equality -> comparison (("==" | "!=") comparison)?.
     std::unique_ptr<Expr> equality();
-    /// @brief comparison -> term ((">" | ">=" | "<" | "<=") term)*. Left-associative.
+    /// @brief comparison -> term ((">" | ">=" | "<" | "<=") term)?.
     std::unique_ptr<Expr> comparison();
 
     /// @brief Consumes the current token. @return The token just consumed.

@@ -12,6 +12,19 @@ std::string describeToken(const Token& token)
     return "'" + token.lexeme + "'";
 }
 
+bool isEqualityOperator(tokenType type)
+{
+    return type == tokenType::EQUAL_EQUAL || type == tokenType::BANG_EQUAL;
+}
+
+bool isComparisonOperator(tokenType type)
+{
+    return type == tokenType::LESS ||
+           type == tokenType::LESS_EQUAL ||
+           type == tokenType::GREATER ||
+           type == tokenType::GREATER_EQUAL;
+}
+
 [[noreturn]] void throwParserError(const Token& token, const std::string& message)
 {
     throw std::runtime_error(
@@ -131,25 +144,33 @@ std::unique_ptr<Expr> Parser::primary() {
     );
 }
 
-// equality -> comparison (("==" | "!=") comparison)*
+// equality -> comparison (("==" | "!=") comparison)?
 std::unique_ptr<Expr> Parser::equality() {
     auto expr = comparison();
-    while (match(tokenType::EQUAL_EQUAL) || match(tokenType::BANG_EQUAL)) {
-        Token op = tokens[current - 1];
-        expr = std::make_unique<Binary>(std::move(expr), op, comparison());
+
+    if (isEqualityOperator(peek().type)) {
+        Token op = advance();
+        auto right = comparison();
+        expr = std::make_unique<Binary>(
+            std::move(expr),
+            op,
+            std::move(right)
+        );
     }
+
+    if (isEqualityOperator(peek().type)) {
+        throwParserError(peek(), "Chained comparisons are not supported");
+    }
+
     return expr;
 }
 
-// comparison -> term ((">" | ">=" | "<" | "<=") term)*
+// comparison -> term ((">" | ">=" | "<" | "<=") term)?
 std::unique_ptr<Expr> Parser::comparison() {
     auto expr = term();
 
-    while (match(tokenType::LESS) ||
-           match(tokenType::LESS_EQUAL) ||
-           match(tokenType::GREATER) ||
-           match(tokenType::GREATER_EQUAL)) {
-        Token op = tokens[current - 1];
+    if (isComparisonOperator(peek().type)) {
+        Token op = advance();
         auto right = term();
 
         expr = std::make_unique<Binary>(
@@ -157,6 +178,10 @@ std::unique_ptr<Expr> Parser::comparison() {
             op,
             std::move(right)
         );
+    }
+
+    if (isComparisonOperator(peek().type)) {
+        throwParserError(peek(), "Chained comparisons are not supported");
     }
 
     return expr;
