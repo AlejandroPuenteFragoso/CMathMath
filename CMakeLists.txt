@@ -9,7 +9,10 @@ add_executable(
     interpreter
     src/main/main.cpp
     src/lexer/lexer.cpp
-  "src/ast/expr.h" "src/parser/parser.h" "src/parser/parser.cpp")
+    src/parser/parser.cpp
+    src/ast/astPrinter.cpp
+    src/runtime/interpreter.cpp
+    "src/ast/expr.h" "src/parser/parser.h")
 
 # Tests (opcional). Configurar con: cmake -B build -DBUILD_TESTING=ON
 option(BUILD_TESTING "Compilar la suite de tests" OFF)

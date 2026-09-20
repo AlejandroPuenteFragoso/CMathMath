@@ -18,9 +18,12 @@ add_executable(cmathmath_tests
     test_lexer.cpp
     test_parser.cpp
     test_evaluator.cpp
-    # Fuentes del proyecto bajo prueba (expr.h es header-only):
+    test_ast_printer.cpp
+    # Fuentes del proyecto bajo prueba:
     ${CMAKE_SOURCE_DIR}/src/lexer/lexer.cpp
     ${CMAKE_SOURCE_DIR}/src/parser/parser.cpp
+    ${CMAKE_SOURCE_DIR}/src/ast/astPrinter.cpp
+    ${CMAKE_SOURCE_DIR}/src/runtime/interpreter.cpp
 )
 
 # Permite incluir como "lexer/lexer.h", "parser/parser.h", etc.

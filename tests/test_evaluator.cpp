@@ -3,13 +3,16 @@
 #include <string>
 #include "lexer/lexer.h"
 #include "parser/parser.h"
+#include "runtime/interpreter.h"
 
 // Helper: de texto fuente al valor evaluado.
 static Value eval(const std::string& src) {
     Lexer lexer(src);
     lexer.scanTokens();
     Parser parser(lexer.getTokens());
-    return parser.parse()->eval();
+    auto ast = parser.parse();
+    Interpreter interpreter;
+    return interpreter.evaluate(*ast);
 }
 
 static double evalNumber(const std::string& src) {
@@ -101,6 +104,22 @@ TEST_CASE("Evaluador: rechaza tipos no numéricos en aritmética") {
 
 TEST_CASE("Evaluador: no acepta ! como operador binario") {
     CHECK_THROWS(eval("3 ! 2"));
+}
+
+TEST_CASE("Interpreter: evaluates separate trees with one instance") {
+    Interpreter interpreter;
+
+    Lexer numberLexer("1 + 2");
+    numberLexer.scanTokens();
+    Parser numberParser(numberLexer.getTokens());
+    auto numberAst = numberParser.parse();
+    CHECK(std::get<double>(interpreter.evaluate(*numberAst)) == doctest::Approx(3.0));
+
+    Lexer booleanLexer("!nil");
+    booleanLexer.scanTokens();
+    Parser booleanParser(booleanLexer.getTokens());
+    auto booleanAst = booleanParser.parse();
+    CHECK(std::get<bool>(interpreter.evaluate(*booleanAst)));
 }
 
 // TODO(Alex, #17): tras corregir la doble evaluación, añadir un test con efectos

@@ -31,19 +31,12 @@ public:
 
     /**
      * @brief Parses the whole token stream as a single expression.
-     * @return Root of the resulting AST; evaluate it with Expr::eval().
+     * @return Root of the resulting AST; evaluate it with Interpreter.
      * @throws std::runtime_error if the stream is not one well-formed
      *         expression: unexpected token, missing ')', chained comparisons
      *         or trailing tokens after the expression (e.g. "1 2").
      */
     std::unique_ptr<Expr> parse();
-
-    /**
-     * @brief Prints the tree shape of an AST to stdout, for debugging.
-     * @param expr   Root of the subtree to print. Must not be null.
-     * @param indent Depth of the current node; two spaces per level.
-     */
-    void printAST(Expr* expr, int indent = 0);
 
 private:
     std::vector<Token> tokens; ///< Input stream, always terminated by EOF_TOKEN.
