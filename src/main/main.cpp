@@ -4,6 +4,8 @@
 #include "../lexer/lexer.h"
 #include "../lexer/tokenType.h"
 #include "../parser/parser.h"
+#include "../runtime/interpreter.h"
+#include "../ast/astPrinter.h"
 
 int main() {
     std::string input;
@@ -43,10 +45,12 @@ int main() {
 
             Parser parser(lexer.getTokens());
             auto ast = parser.parse();
-            auto result = ast->eval();
+            Interpreter interpreter;
+            auto result = interpreter.evaluate(*ast);
 
             std::cout << "AST created successfully\n";
-            parser.printAST(ast.get());
+            AstPrinter printer(std::cout);
+            printer.print(*ast);
             std::cout << "Result: " << valueToString(result) << "\n";
         }
         catch (const std::exception& e) {

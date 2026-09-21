@@ -1,6 +1,5 @@
 #include "parser.h"
 #include <stdexcept>
-#include <iostream>
 
 namespace {
 
@@ -203,25 +202,4 @@ std::unique_ptr<Expr> Parser::term() {
     }
 
     return expr;
-}
-
-void Parser::printAST(Expr* expr, int indent) {
-    std::string spaces(indent * 2, ' ');
-
-    if (auto lit = dynamic_cast<Literal*>(expr)) {
-        std::cout << spaces << "Literal: " << valueToString(lit->value) << std::endl;
-    }
-    else if (auto unary = dynamic_cast<Unary*>(expr)) {
-        std::cout << spaces << "Unary: " << unary->op.lexeme << std::endl;
-        printAST(unary->right.get(), indent + 1);
-    }
-    else if (auto binary = dynamic_cast<Binary*>(expr)) {
-        std::cout << spaces << "Binary: " << binary->op.lexeme << std::endl;
-        printAST(binary->left.get(), indent + 1);
-        printAST(binary->right.get(), indent + 1);
-    }
-    else if (auto group = dynamic_cast<Grouping*>(expr)) {
-        std::cout << spaces << "Grouping" << std::endl;
-        printAST(group->expression.get(), indent + 1);
-    }
 }

@@ -119,8 +119,8 @@ Escribe `exit` para cerrar el intérprete. Type `exit` to close the interpreter.
 ```text
 src/lexer/      Tokenización / Tokenization
 src/parser/     Parser de descenso recursivo / Recursive-descent parser
-src/ast/        Nodos y evaluación del AST / AST nodes and evaluation
-src/runtime/    Valores en tiempo de ejecución / Runtime values
+src/ast/        Nodos y representación del AST / AST nodes and printing
+src/runtime/    Intérprete y valores / Interpreter and runtime values
 src/main/       REPL de consola / Console REPL
 tests/          Pruebas automatizadas / Automated tests
 docs/           Gramática, decisiones y documentación / Grammar and documentation
