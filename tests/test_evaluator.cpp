@@ -46,7 +46,16 @@ TEST_CASE("Evaluador: el menos unario funciona") {
 }
 
 TEST_CASE("Evaluador: la división por cero lanza error") {
-    CHECK_THROWS(eval("1 / 0"));
+    CHECK_THROWS_WITH(eval("1 / 0"), "Division by zero error");
+}
+
+TEST_CASE("Evaluator: validates numeric operands before division-specific rules") {
+    CHECK_THROWS_WITH(eval("true / 0"), "Operand must be a number");
+    CHECK_THROWS_WITH(eval("nil / 0"), "Operand must be a number");
+    CHECK_THROWS_WITH(eval("1 / false"), "Operand must be a number");
+    CHECK_THROWS_WITH(eval("true < 1"), "Operand must be a number");
+    CHECK(evalBoolean("true == true"));
+    CHECK(evalBoolean("nil == nil"));
 }
 
 TEST_CASE("Evaluador: comparaciones devuelven booleanos") {
