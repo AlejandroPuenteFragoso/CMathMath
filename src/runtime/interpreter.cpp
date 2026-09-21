@@ -5,20 +5,31 @@
 
 namespace {
 
-bool isNumericOperator(tokenType type) {
-    switch (type) {
-    case tokenType::PLUS:
-    case tokenType::MINUS:
-    case tokenType::STAR:
-    case tokenType::SLASH:
-    case tokenType::LESS:
-    case tokenType::LESS_EQUAL:
-    case tokenType::GREATER:
-    case tokenType::GREATER_EQUAL:
-        return true;
-    default:
-        return false;
+using NumericOperation = Value (*)(double, double);
+
+struct NumericOperator {
+    tokenType type;
+    NumericOperation operation;
+};
+
+const NumericOperator numericOperators[] = {
+    {tokenType::PLUS, [](double a, double b) -> Value { return a + b; }},
+    {tokenType::MINUS, [](double a, double b) -> Value { return a - b; }},
+    {tokenType::STAR, [](double a, double b) -> Value { return a * b; }},
+    {tokenType::SLASH, [](double a, double b) -> Value { return a / b; }},
+    {tokenType::LESS, [](double a, double b) -> Value { return a < b; }},
+    {tokenType::LESS_EQUAL, [](double a, double b) -> Value { return a <= b; }},
+    {tokenType::GREATER, [](double a, double b) -> Value { return a > b; }},
+    {tokenType::GREATER_EQUAL, [](double a, double b) -> Value { return a >= b; }}
+};
+
+const NumericOperator* findNumericOperator(tokenType type) {
+    for (const auto& op : numericOperators) {
+        if (op.type == type) {
+            return &op;
+        }
     }
+    return nullptr;
 }
 
 std::pair<double, double> checkNumberOperands(const Value& left, const Value& right) {
@@ -50,44 +61,20 @@ void Interpreter::visitBinary(Binary& expr) {
         result = !valuesEqual(leftValue, rightValue);
         return;
     }
-    if (!isNumericOperator(expr.op.type)) {
-        throw std::runtime_error("Unknown operator");
-    }
+    const NumericOperator* op = findNumericOperator(expr.op.type);
 
-    const auto [leftNumber, rightNumber] = checkNumberOperands(leftValue, rightValue);
+if (op == nullptr) {
+    throw std::runtime_error("Unknown operator");
+}
 
-    switch (expr.op.type) {
-    case tokenType::PLUS:
-        result = leftNumber + rightNumber;
-        break;
-    case tokenType::MINUS:
-        result = leftNumber - rightNumber;
-        break;
-    case tokenType::STAR:
-        result = leftNumber * rightNumber;
-        break;
-    case tokenType::SLASH: {
-        if (rightNumber == 0.0) {
-            throw std::runtime_error("Division by zero error");
-        }
-        result = leftNumber / rightNumber;
-        break;
-    }
-    case tokenType::LESS:
-        result = leftNumber < rightNumber;
-        break;
-    case tokenType::LESS_EQUAL:
-        result = leftNumber <= rightNumber;
-        break;
-    case tokenType::GREATER:
-        result = leftNumber > rightNumber;
-        break;
-    case tokenType::GREATER_EQUAL:
-        result = leftNumber >= rightNumber;
-        break;
-    default:
-        throw std::runtime_error("Unknown operator");
-    }
+const auto [leftNumber, rightNumber] =
+    checkNumberOperands(leftValue, rightValue);
+
+if (expr.op.type == tokenType::SLASH && rightNumber == 0.0) {
+    throw std::runtime_error("Division by zero error");
+}
+
+result = op->operation(leftNumber, rightNumber);
 }
 
 void Interpreter::visitGrouping(Grouping& expr) {
