@@ -18,6 +18,11 @@ inline bool isTruthy(const Value& value)
     return true;
 }
 
+/**
+ * @brief Extracts the numeric value required by arithmetic and order operators.
+ * @return The stored double.
+ * @throws std::runtime_error if value holds a boolean or nil.
+ */
 inline double asNumber(const Value& value)
 {
     if (const auto number = std::get_if<double>(&value)) {
